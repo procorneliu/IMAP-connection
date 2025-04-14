@@ -1,0 +1,30 @@
+{
+  "name": "jondra_plugin",
+  "version": "2.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "NODE_NO_WARNINGS=1 nodemon server.js"
+  },
+  "keywords": [],
+  "author": "Jondra Brothers",
+  "license": "ISC",
+  "type": "module",
+  "description": "Get Adobe codes from gmail inboxes",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "googleapis": "^148.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-react": "^7.37.5",
+    "prettier": "^3.5.3"
+  }
+}
