@@ -1,4 +1,6 @@
 function decodeBase64(encoded) {
+  // replace on encoded is converting base64ulr format into base64-encoded string
+  // atob is decoding base64-encoded string into plain text
   return atob(encoded.replace(/-/g, '+').replace(/_/g, '/'));
 }
 

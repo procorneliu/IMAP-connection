@@ -1,5 +1,6 @@
+// get a formated string with how long ago email was send
 export default function getTimeDifference(emailDate) {
-  const now = new Date();
+  const now = new Date(Date.now());
   const diffMs = now - emailDate;
   const diffMinutes = Math.floor(diffMs / (1000 * 60));
   const diffHours = Math.floor(diffMinutes / 60);
