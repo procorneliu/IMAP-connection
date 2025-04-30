@@ -15,7 +15,8 @@
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "imap": "^0.8.19",
-    "mailparser": "^3.7.2"
+    "mailparser": "^3.7.2",
+    "nodemon": "^3.1.10"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
@@ -26,7 +27,6 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-react": "^7.37.5",
-    "nodemon": "^3.1.10",
     "prettier": "^3.5.3"
   }
 }
