@@ -1,5 +1,14 @@
 # syntax = docker/dockerfile:1
 
+# Create the public/assets directory
+RUN mkdir -p public/assets
+
+# Run and own only the runtime files as a non-root user for security
+RUN groupadd --system --gid 1000 rails && \
+    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
+    chown -R 1000:1000 db log storage tmp public/assets
+USER 1000:1000
+
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=20.18.0
 FROM node:${NODE_VERSION}-slim AS base
