@@ -1,50 +1,42 @@
 // utils imports
-import extractEmailBody from './utils/extractEmailBody.js';
-import extractVerificationCode from './utils/extractVerificationCode.js';
 import getTimeDifference from './utils/getTimeDifference.js';
 import copyToClipboard from './utils/copyToClipboard.js';
 
 // Importing DOM elements
 const emailList = document.getElementById('email-list');
 
-const MAX_EMAILS = 5;
-let count = 0;
+// getting latest codes and start listening to new once
+const getCodes = async () => {
+  //get codes and sending time
+  const { data } = await fetch('/codes')
+    .then((res) => res.json())
+    .catch((err) => console.log(console.error(err.message)));
 
-async function getAdobeCodes() {
-  const inboxAndToken = await fetchInboxAndToken();
-  if (!inboxAndToken) return (emailList.innerHTML = '<p>Failed to authenticate.</p>');
-  const { token, inbox } = inboxAndToken;
+  // remove loading text 'Wait a moment...'
+  emailList.innerText = '';
+  // for all found codes, add them to UI
+  data.forEach((el) => addCode(el));
 
-  // get message Adobe code from first 5 messages
-  for (let msg of inbox.messages) {
-    if (count >= MAX_EMAILS) break;
+  // listening in real-time to newly sent codes
+  const eventSource = new EventSource('/event');
+  eventSource.onmessage = async function (event) {
+    const data = JSON.parse(event.data);
+    addCode(data);
+  };
+};
 
-    // get message data
-    const msgData = await getMessageData(msg, token);
-    const messageHeaders = msgData.payload.headers;
-
-    // check if message is from Adobe
-    const fromHeader = messageHeaders.find((header) => header.name === 'From').value.split(' ')[0];
-    if (fromHeader !== 'Adobe') continue;
-
-    // get message time of sending
-    const dateHeader = messageHeaders.find((header) => header.name === 'Date').value;
-    const timeDifference = getTimeDifference(new Date(dateHeader));
-
-    // convert email data into plain text
-    let body = extractEmailBody(msgData);
-
-    //extracting verification code from message body
-    const verificationCode = extractVerificationCode(body);
-    if (!verificationCode) continue;
-
-    // insert code in DOM
-    const emailElement = emailElementContent(timeDifference, verificationCode);
-    emailList.appendChild(emailElement);
-
-    count++;
+// adding code to UI interface
+const addCode = (el) => {
+  const time = getTimeDifference(new Date(el.date).getTime());
+  const code = el.code;
+  const emailElement = emailElementContent(time, code);
+  // if first 5 email was add, add newly on top
+  if (emailList.childElementCount > 5) {
+    emailList.append(emailElement);
+  } else {
+    emailList.prepend(emailElement);
   }
-}
+};
 
 // creating a email message div with code and copy code to clipboard
 const emailElementContent = (timeDifference, verificationCode) => {
@@ -52,33 +44,13 @@ const emailElementContent = (timeDifference, verificationCode) => {
   div.classList.add('email-item');
   div.innerHTML = `<strong>Verification Code</strong>
      <div class="email-date">From: Adobe | ${timeDifference}</div>
-     <p style="margin-top: 20px;">Verification code: <strong>${verificationCode}</strong></p>
+     <p style="margin-top: 20px;">Code: <strong>${verificationCode}</strong></p>
      <button class="copy-btn">Copy Code</button>`;
 
-  div.querySelector('.copy-btn').addEventListener('click', () => copyToClipboard(verificationCode));
+  div.querySelector('.copy-btn').addEventListener('click', (e) => copyToClipboard(verificationCode, e.target));
 
   return div;
 };
 
-// fetching inbox and token data
-const fetchInboxAndToken = async () => {
-  const { data } = await fetch('/inbox')
-    .then((res) => res.json())
-    .catch((err) => {
-      console.error(err.message);
-    });
-
-  return data;
-};
-
-const getMessageData = async (msg, token) => {
-  const msgResponse = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return await msgResponse.json();
-};
-
 // Run function after DOM Content was loaded
-window.addEventListener('DOMContentLoaded', getAdobeCodes);
+window.addEventListener('DOMContentLoaded', getCodes);
