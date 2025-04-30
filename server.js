@@ -69,6 +69,6 @@ app.get('/event', (req, res) => {
 
 // starting server
 const port = process.env.PORT;
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`App running on port ${port}...`);
 });
