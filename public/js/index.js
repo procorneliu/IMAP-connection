@@ -14,15 +14,11 @@ const getCodes = async (retries = 3) => {
       .then((res) => res.json())
       .catch((err) => console.log(console.error(err.message)));
 
-    if (!data) {
-      // after time make a new try to get codes
-      return await new Promise((res) => setTimeout(res, 1000)); // wait 1s
-    }
-    inboxData = data;
-    break;
-  }
+    if (data && data.length) return (inboxData = data);
 
-  if (!inboxData) throw new Error('No data found!');
+    // after time make a new try to get codes
+    await new Promise((res) => setTimeout(res, 1000)); // wait 1s
+  }
 
   // remove loading text 'Wait a moment...'
   emailList.innerText = '';
