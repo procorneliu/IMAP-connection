@@ -6,24 +6,18 @@ import copyToClipboard from './utils/copyToClipboard.js';
 const emailList = document.getElementById('email-list');
 
 // getting latest codes and start listening to new once
-const getCodes = async (retries = 3) => {
-  //get codes and sending time
-  let inboxData;
-  for (let i = 0; i < retries; i++) {
-    const { data } = await fetch('/codes')
-      .then((res) => res.json())
-      .catch((err) => console.log(console.error(err.message)));
+const getCodes = async () => {
+  //get codes and sending times
+  await new Promise((res) => setTimeout(res, 1000)); // timer for making shure IMAP is connected
 
-    if (data && data.length) return (inboxData = data);
-
-    // after time make a new try to get codes
-    await new Promise((res) => setTimeout(res, 1000)); // wait 1s
-  }
+  const { data } = await fetch('/codes')
+    .then((res) => res.json())
+    .catch((err) => console.log(console.error(err.message)));
 
   // remove loading text 'Wait a moment...'
   emailList.innerText = '';
   // for all found codes, add them to UI
-  inboxData.forEach((el) => addCode(el));
+  data.forEach((el) => addCode(el));
 
   // listening in real-time to newly sent codes
   const eventSource = new EventSource('/event');
