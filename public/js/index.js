@@ -6,23 +6,29 @@ import copyToClipboard from './utils/copyToClipboard.js';
 const emailList = document.getElementById('email-list');
 
 // getting latest codes and start listening to new once
-const getCodes = async () => {
+const getCodes = async (retries = 3) => {
   //get codes and sending time
-  const { data } = await fetch('/codes')
-    .then((res) => res.json())
-    .catch((err) => console.log(console.error(err.message)));
+  for (let i = 0; i < retries; i++) {
+    const { data } = await fetch('/codes')
+      .then((res) => res.json())
+      .catch((err) => console.log(console.error(err.message)));
 
-  // remove loading text 'Wait a moment...'
-  emailList.innerText = '';
-  // for all found codes, add them to UI
-  data.forEach((el) => addCode(el));
+    if (!data) {
+      // after time make a new try to get codes
+      return await new Promise((res) => setTimeout(res, 1000)); // wait 1s
+    }
+    // remove loading text 'Wait a moment...'
+    emailList.innerText = '';
+    // for all found codes, add them to UI
+    data.forEach((el) => addCode(el));
 
-  // listening in real-time to newly sent codes
-  const eventSource = new EventSource('/event');
-  eventSource.onmessage = async function (event) {
-    const data = JSON.parse(event.data);
-    addCode(data);
-  };
+    // listening in real-time to newly sent codes
+    const eventSource = new EventSource('/event');
+    eventSource.onmessage = async function (event) {
+      const data = JSON.parse(event.data);
+      addCode(data);
+    };
+  }
 };
 
 // adding code to UI interface
